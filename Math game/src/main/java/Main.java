@@ -16,8 +16,9 @@ public class Main {
             AuthService auth = new AuthService(db);
 
             while (true) {
+                clearScreen();
                 System.out.println("╔═════════════════════════╗");
-                System.out.println("║    MATH PRACTICE APP    ║");
+                System.out.println("║      MATH GAME APP      ║");
                 System.out.println("╚═════════════════════════╝");
                 System.out.println("1. Register");
                 System.out.println("2. Login");
@@ -93,10 +94,22 @@ public class Main {
                 long points = stats != null ? (long) stats.get("points") : 0L;
                 int solved = stats != null ? (int) stats.get("solvedCount") : 0;
 
+                clearScreen();
                 System.out.println("\n╔════════════════════════════════════════════╗");
-                System.out.printf("║  Welcome, : "+ username+"\n");
-                System.out.printf("║  Points: "+ points+"|  Problems Solved:"+ solved+"\n");
+                System.out.printf("║  Welcome, : "+ username);
+
+                for(int i=0; i<(45-("║  Welcome, : "+ username).length()); i++)
+                    System.out.print(" ");
+                System.out.println("║");
+
+                System.out.printf("║  Points: "+ points+"|  Problems Solved:"+ solved);
+
+                for(int i=0; i<(45-("║  Points: "+ points+"|  Problems Solved:"+ solved).length()); i++)
+                    System.out.print(" ");
+                System.out.println("║");
+
                 System.out.println("╚════════════════════════════════════════════╝");
+
             } catch (Exception e) {
                 System.out.println("\nWelcome, " + username + "!");
             }
@@ -356,7 +369,6 @@ public class Main {
                 }else if ((isAdmin && choice == 5) || (!isAdmin && choice == 3)){
                     clearScreen();
                     leaderBoard lb = new leaderBoard();
-                    lb.fetchLeaderboardMap();
                     lb.printTop10FromFirestore();
                     String b = input.nextLine();
                 } else {

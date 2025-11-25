@@ -7,24 +7,6 @@ import java.util.*;
 
 public  class leaderBoard
 {
-    public Map<String, Long> fetchLeaderboardMap() throws InterruptedException, ExecutionException {
-        Firestore db = FirestoreClient.getFirestore();
-
-        ApiFuture<QuerySnapshot> query = db.collection("users")
-                .get(); // ممكن تضيف orderBy لو عايز من السيرفر
-
-        List<QueryDocumentSnapshot> docs = query.get().getDocuments();
-
-        Map<String, Long> map = new HashMap<>();
-        for (DocumentSnapshot doc : docs) {
-            String playerId = doc.getId(); // أو doc.getString("name") لو بتحب الاسم key
-            Long score = doc.contains("points") ? doc.getLong("points") : 0L;
-            map.put(playerId, score);
-        }
-
-        return map;
-    }
-
     public void printTop10FromFirestore() throws Exception {
         Firestore db = FirestoreClient.getFirestore();
 
