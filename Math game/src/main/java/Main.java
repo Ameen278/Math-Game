@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    static cli cli = new cli();
     public static void main(String[] args) {
         Firestore db = null;
         Scanner scanner = new Scanner(System.in);
@@ -16,14 +17,7 @@ public class Main {
             AuthService auth = new AuthService(db);
 
             while (true) {
-                clearScreen();
-                System.out.println("╔═════════════════════════╗");
-                System.out.println("║      MATH GAME APP      ║");
-                System.out.println("╚═════════════════════════╝");
-                System.out.println("1. Register");
-                System.out.println("2. Login");
-                System.out.println("3. Exit");
-                System.out.print("Choose an option: ");
+                cli.loginMenu();
 
                 String choice = scanner.nextLine().trim();
 
@@ -94,38 +88,12 @@ public class Main {
                 long points = stats != null ? (long) stats.get("points") : 0L;
                 int solved = stats != null ? (int) stats.get("solvedCount") : 0;
 
-                clearScreen();
-                System.out.println("\n╔════════════════════════════════════════════╗");
-                System.out.printf("║  Welcome, : "+ username);
-
-                for(int i=0; i<(45-("║  Welcome, : "+ username).length()); i++)
-                    System.out.print(" ");
-                System.out.println("║");
-
-                System.out.printf("║  Points: "+ points+"|  Problems Solved:"+ solved);
-
-                for(int i=0; i<(45-("║  Points: "+ points+"|  Problems Solved:"+ solved).length()); i++)
-                    System.out.print(" ");
-                System.out.println("║");
-
-                System.out.println("╚════════════════════════════════════════════╝");
-
+                cli.mainMenu( username, points, solved, isAdmin); // from class cli.java
+            
             } catch (Exception e) {
                 System.out.println("\nWelcome, " + username + "!");
             }
-
-            System.out.println("\n=== Main Menu ===");
-            System.out.println("1. Solve a problem");
-
-            if (isAdmin) {
-                System.out.println("2. Add new formula (Admin)");
-                System.out.println("3. Manage formulas (Admin)");
-                System.out.println("4. Logout");
-                System.out.println("5. Leaderboard");
-            } else {
-                System.out.println("2. Logout");
-                System.out.println("3. Leaderboard");
-            }
+                
 
             System.out.print("\nYour choice: ");
             String choiceStr = input.nextLine().trim();
@@ -280,15 +248,7 @@ public class Main {
                     String docId = list.get(pick);
                     String currentTitle = formulas.getTitle(docId);
 
-                    System.out.println("\nEditing: " + (currentTitle != null ? currentTitle : "Untitled"));
-                    System.out.println("1. Edit title");
-                    System.out.println("2. Edit LaTeX");
-                    System.out.println("3. Edit points");
-                    System.out.println("4. Edit difficulty");
-                    System.out.println("5. Edit correct answer");
-                    System.out.println("6. Delete formula");
-                    System.out.println("7. Change formula ID");
-                    System.out.print("\nChoose action: ");
+                    cli.editingMenu( currentTitle); // from class cli.java
 
                     int action;
                     try {
@@ -367,7 +327,7 @@ public class Main {
                     return;
 
                 }else if ((isAdmin && choice == 5) || (!isAdmin && choice == 3)){
-                    clearScreen();
+                    cli.clearScreen();
                     leaderBoard lb = new leaderBoard();
                     lb.printTop10FromFirestore();
                     String b = input.nextLine();
@@ -379,21 +339,6 @@ public class Main {
                 System.out.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static void clearScreen() {
-        try {
-            String os = System.getProperty("os.name").toLowerCase();
-            
-            if (os.contains("windows")) {
-                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            } else {
-                new ProcessBuilder("clear").inheritIO().start().waitFor();
-            }
-        } catch (Exception e) {
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
         }
     }
 
