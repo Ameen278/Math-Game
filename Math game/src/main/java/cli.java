@@ -3,13 +3,16 @@ public class cli {
     public void loginMenu()
     {
         clearScreen();
-        System.out.println("╔═════════════════════════╗");
-        System.out.println("║      MATH GAME APP      ║");
-        System.out.println("╚═════════════════════════╝");
-        System.out.println("1. Register");
-        System.out.println("2. Login");
-        System.out.println("3. Exit");
-        System.out.print("Choose an option: ");
+    System.out.println("  ███╗   ███╗ █████╗ ████████╗██╗  ██╗     ██████╗  █████╗ ███╗   ███╗███████╗");
+    System.out.println("  ████╗ ████║██╔══██╗╚══██╔══╝██║  ██║    ██╔════╝ ██╔══██╗████╗ ████║██╔════╝");
+    System.out.println("  ██╔████╔██║███████║   ██║   ███████║    ██║  ███╗███████║██╔████╔██║██████╗");
+    System.out.println("  ██║╚██╔╝██║██╔══██║   ██║   ██╔══██║    ██║   ██║██╔══██║██║╚██╔╝██║██════╝");
+    System.out.println("  ██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║    ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗");
+    System.out.println("  ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝");
+    System.out.println("");
+    System.out.println("                                 Math Game  ");
+    System.out.println("");
+    System.out.println("                    1) Register     2) Login     3) Exit");
     }
 
     public void mainMenu(String username, long points, int solved, boolean isAdmin)

@@ -8,6 +8,7 @@ import java.util.Scanner;
 
 public class Main {
     static cli cli = new cli();
+
     public static void main(String[] args) {
         Firestore db = null;
         Scanner scanner = new Scanner(System.in);
@@ -63,6 +64,7 @@ public class Main {
                 } else if (choice.equals("3")) {
                     System.out.println("Thank you for using Math Practice App! Goodbye!");
                     break;
+
                 } else {
                     System.out.println("Invalid option. Please try again.");
                 }
@@ -80,20 +82,21 @@ public class Main {
     public static void main_menu(Firestore db, boolean isAdmin, String username, AuthService auth) {
         Scanner input = new Scanner(System.in);
         FormulaDb formulas = new FormulaDb(db);
+        List<String> categories = new ArrayList<>();
 
         while (true) {
-            // Show user stats
+
+            // Show user stats safely
             try {
                 var stats = auth.getUserStats(username);
                 long points = stats != null ? (long) stats.get("points") : 0L;
                 int solved = stats != null ? (int) stats.get("solvedCount") : 0;
 
-                cli.mainMenu( username, points, solved, isAdmin); // from class cli.java
-            
+                cli.mainMenu(username, points, solved, isAdmin);
+
             } catch (Exception e) {
                 System.out.println("\nWelcome, " + username + "!");
             }
-                
 
             System.out.print("\nYour choice: ");
             String choiceStr = input.nextLine().trim();
@@ -108,9 +111,50 @@ public class Main {
             }
 
             try {
+
+                // ================= CHOICE 1 (SOLVE PROBLEM) =================
                 if (choice == 1) {
-                    // === SOLVE A PROBLEM ===
+
                     List<String> allIds = formulas.listAll();
+
+                    for (String id : allIds) {
+                        String c = formulas.getCategory(id);
+                        if (!categories.contains(c)) categories.add(c);
+                    }
+
+                    System.out.println("\nChoose a category:");
+                    for (int i = 0; i < categories.size(); i++) {
+                        System.out.println((i + 1) + ". " + categories.get(i));
+                    }
+
+                    System.out.print("Category number: ");
+                    int catIndex;
+
+                    try {
+                        catIndex = Integer.parseInt(input.nextLine().trim()) - 1;
+                    } catch (Exception e) {
+                        System.out.println("Invalid input.");
+                        continue;
+                    }
+
+                    if (catIndex < 0 || catIndex >= categories.size()) {
+                        System.out.println("Invalid category!");
+                        continue;
+                    }
+
+                    String selectedCategory = categories.get(catIndex);
+                    System.out.println("Selected category: " + selectedCategory);
+
+                    List<String> categoryIds = new ArrayList<>();
+                    for (String id : allIds) {
+                        if (formulas.getCategory(id).equals(selectedCategory))
+                            categoryIds.add(id);
+                    }
+
+                    if (categoryIds.isEmpty()) {
+                        System.out.println("No problems in this category!");
+                        continue;
+                    }
                     if (allIds.isEmpty()) {
                         System.out.println("No formulas available yet!");
                         continue;
@@ -135,7 +179,7 @@ public class Main {
                         String title = formulas.getTitle(id);
                         int pts = formulas.getPoints(id);
                         String diff = formulas.getDifficulty(id);
-                        System.out.printf(i + 1+" "+diff+" "+pts+" → "+title+"\n");
+                        System.out.printf(i + 1 + " " + diff + " " + pts + " → " + title + "\n");
                     }
 
                     System.out.print("\nChoose problem number: ");
@@ -146,6 +190,7 @@ public class Main {
                         System.out.println("Invalid number!");
                         continue;
                     }
+
                     if (pick < 1 || pick > unsolved.size()) {
                         System.out.println("Invalid choice!");
                         continue;
@@ -160,6 +205,7 @@ public class Main {
                     System.out.printf("\n=== %s ===\n", title != null ? title : "Problem");
                     System.out.println("Points: " + points);
                     System.out.println("LaTeX: " + latex);
+
                     formulaToImage.convertAndOpen(latex, "CurrentProblem.png", 40f);
 
                     System.out.print("\nYour answer: ");
@@ -176,7 +222,7 @@ public class Main {
                         boolean awarded = auth.markFormulaAsSolved(username, selectedId, points);
                         if (awarded) {
                             long newPoints = (long) auth.getUserStats(username).get("points");
-                            System.out.printf("CORRECT!"+"+"+points+"and you have Total pts : "+newPoints);
+                            System.out.printf("CORRECT! +" + points + " and you have Total pts : " + newPoints + "\n");
                         } else {
                             System.out.println("You already solved this one!");
                         }
@@ -184,8 +230,10 @@ public class Main {
                         System.out.println("Incorrect! Correct answer: " + correctAnswer);
                     }
 
-                } else if (isAdmin && choice == 2) {
-                    // === ADD NEW FORMULA ===
+                }
+
+                // ================= ADMIN: ADD FORMULA =================
+                else if (isAdmin && choice == 2) {
                     System.out.println("\n--- Add New Formula ---");
                     System.out.print("Title: ");
                     String title = input.nextLine().trim();
@@ -202,6 +250,7 @@ public class Main {
                     System.out.print("Points (default 10): ");
                     String ptsStr = input.nextLine().trim();
                     int points = 10;
+
                     try {
                         if (!ptsStr.isEmpty()) points = Integer.parseInt(ptsStr);
                         if (points < 1) points = 10;
@@ -211,11 +260,17 @@ public class Main {
                     String diff = input.nextLine().trim().toLowerCase();
                     if (!diff.matches("easy|medium|hard")) diff = "medium";
 
-                    String id = formulas.addFormula(title, latex, points, diff, answer);
-                    System.out.println("Formula added successfully! ID: " + id);
+                    System.out.print("Category (e.g., algebra, geometry, calculus): ");
+                    String category = input.nextLine().trim().toLowerCase();
+                    if (category.isEmpty()) category = "general";
 
-                } else if (isAdmin && choice == 3) {
-                    // === FULL ADMIN EDITING MENU ===
+                    String id = formulas.addFormula(title, latex, points, diff, answer, category);
+                    System.out.println("Formula added successfully! ID: " + id);
+                }
+
+                // ================= ADMIN: EDIT FORMULAS =================
+                else if (isAdmin && choice == 3) {
+
                     List<String> list = formulas.listAll();
                     if (list.isEmpty()) {
                         System.out.println("No formulas to manage.");
@@ -229,7 +284,7 @@ public class Main {
                         int pts = formulas.getPoints(id);
                         String diff = formulas.getDifficulty(id);
                         String ans = formulas.getCorrectAnswer(id);
-                        System.out.printf(i + 1+".diffculty:"+diff+" point: "+pts+" category: "+title+" answer: "+ ans+"\n");
+                        System.out.printf((i + 1) + ". difficulty: " + diff + " points: " + pts + " title: " + title + " answer: " + ans + "\n");
                     }
 
                     System.out.print("\nSelect formula to edit: ");
@@ -240,6 +295,7 @@ public class Main {
                         System.out.println("Invalid number!");
                         continue;
                     }
+
                     if (pick < 0 || pick >= list.size()) {
                         System.out.println("Invalid choice!");
                         continue;
@@ -248,7 +304,7 @@ public class Main {
                     String docId = list.get(pick);
                     String currentTitle = formulas.getTitle(docId);
 
-                    cli.editingMenu( currentTitle); // from class cli.java
+                    cli.editingMenu(currentTitle);
 
                     int action;
                     try {
@@ -264,11 +320,13 @@ public class Main {
                             formulas.updateTitle(docId, input.nextLine().trim());
                             System.out.println("Title updated!");
                             break;
+
                         case 2:
                             System.out.print("New LaTeX: ");
                             formulas.updateLatex(docId, input.nextLine().trim());
                             System.out.println("LaTeX updated!");
                             break;
+
                         case 3:
                             System.out.print("New points: ");
                             try {
@@ -280,11 +338,13 @@ public class Main {
                                 formulas.updatePoints(docId, 10);
                             }
                             break;
+
                         case 4:
                             System.out.print("New difficulty (easy/medium/hard): ");
                             formulas.updateDifficulty(docId, input.nextLine().trim());
                             System.out.println("Difficulty updated!");
                             break;
+
                         case 5:
                             System.out.print("New correct answer: ");
                             String newAns = input.nextLine().trim();
@@ -295,6 +355,7 @@ public class Main {
                                 System.out.println("Correct answer updated!");
                             }
                             break;
+
                         case 6:
                             System.out.print("Type (Y) to confirm permanent deletion: ");
                             if (input.nextLine().trim().equalsIgnoreCase("Y")) {
@@ -304,6 +365,7 @@ public class Main {
                                 System.out.println("Deletion cancelled.");
                             }
                             break;
+
                         case 7:
                             System.out.print("New formula ID: ");
                             String newId = input.nextLine().trim();
@@ -318,20 +380,27 @@ public class Main {
                                 System.out.println("ID cannot be empty!");
                             }
                             break;
+
                         default:
                             System.out.println("Invalid action!");
                     }
+                }
 
-                } else if ((isAdmin && choice == 4) || (!isAdmin && choice == 2)) {
+                // ================= LOGOUT =================
+                else if ((isAdmin && choice == 4) || (!isAdmin && choice == 2)) {
                     System.out.println("Logging out... See you soon, " + username + "!");
                     return;
+                }
 
-                }else if ((isAdmin && choice == 5) || (!isAdmin && choice == 3)){
+                // ================= LEADERBOARD =================
+                else if ((isAdmin && choice == 5) || (!isAdmin && choice == 3)) {
                     cli.clearScreen();
                     leaderBoard lb = new leaderBoard();
                     lb.printTop10FromFirestore();
-                    String b = input.nextLine();
-                } else {
+                    input.nextLine();
+                }
+
+                else {
                     System.out.println("Invalid menu option!");
                 }
 

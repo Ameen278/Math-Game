@@ -22,6 +22,12 @@ public class FormulaDb {
         return ids;
     }
 
+    public String getCorrectAnswer(String docId) throws Exception {
+        var doc = db.collection("latex1").document(docId).get().get();
+        if (!doc.exists()) return null;
+        return doc.getString("answer");
+    }
+
     // Get LaTeX code
     public String getLatex(String docId) throws Exception {
         var doc = db.collection("latex1").document(docId).get().get();
@@ -52,26 +58,30 @@ public class FormulaDb {
         return (diff != null && !diff.isEmpty()) ? diff : "medium";
     }
 
-    // NEW: Get correct answer
-    public String getCorrectAnswer(String docId) throws Exception {
+    // ⭐ NEW: Get category
+    public String getCategory(String docId) throws Exception {
         var doc = db.collection("latex1").document(docId).get().get();
-        if (!doc.exists()) return null;
-        return doc.getString("answer");
+        if (!doc.exists()) return "general";
+        String cat = doc.getString("category");
+        return (cat != null && !cat.isEmpty()) ? cat : "general";
     }
 
-    // Add a new formula (now includes answer)
-    public String addFormula(String title, String latex, int points, String difficulty, String answer) throws Exception {
+    // ⭐ Updated: Add formula (now with category)
+    public String addFormula(String title, String latex, int points, String difficulty, String answer, String category) throws Exception {
+
         Map<String, Object> data = new HashMap<>();
         data.put("title", title);
         data.put("latex", latex);
         data.put("points", points);
         data.put("difficulty", difficulty.toLowerCase());
         data.put("answer", answer.trim());
+        data.put("category", category.toLowerCase());
         data.put("createdAt", System.currentTimeMillis());
 
         DocumentReference doc = db.collection("latex1").document();
         doc.set(data).get();
-        System.out.println("Formula added! ID: " + doc.getId() + " | Answer: " + answer);
+
+        System.out.println("Formula added → ID: " + doc.getId() + " | Category: " + category);
         return doc.getId();
     }
 
@@ -97,15 +107,21 @@ public class FormulaDb {
         if (!diff.equals("easy") && !diff.equals("medium") && !diff.equals("hard")) {
             diff = "medium";
         }
-        db.collection("latex1").document(docId).update("difficulty", diff).get();
+        db.collection("latex1").document(docId).update("difficaulty", diff).get();
     }
 
-    // NEW: Update correct answer
+    // Update correct answer
     public void updateAnswer(String docId, String newAnswer) throws Exception {
         if (newAnswer == null || newAnswer.trim().isEmpty()) {
             throw new IllegalArgumentException("Answer cannot be empty!");
         }
         db.collection("latex1").document(docId).update("answer", newAnswer.trim()).get();
+    }
+
+    // ⭐ Update category
+    public void updateCategory(String docId, String newCategory) throws Exception {
+        if (newCategory == null || newCategory.trim().isEmpty()) newCategory = "general";
+        db.collection("latex1").document(docId).update("category", newCategory.toLowerCase()).get();
     }
 
     // Remove formula
@@ -123,6 +139,7 @@ public class FormulaDb {
         Map<String, Object> data = snapshot.getData();
         db.collection("latex1").document(newId).set(data).get();
         oldDoc.delete().get();
+
         System.out.println("ID changed: " + oldId + " → " + newId);
     }
 }
