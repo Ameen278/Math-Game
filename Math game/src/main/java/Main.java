@@ -117,6 +117,8 @@ public class Main {
 
                     List<String> allIds = formulas.listAll();
 
+                    // Clear categories and reload them fresh
+                    categories.clear();
                     for (String id : allIds) {
                         String c = formulas.getCategory(id);
                         if (!categories.contains(c)) categories.add(c);
@@ -163,17 +165,18 @@ public class Main {
                     var stats = auth.getUserStats(username);
                     List<String> solvedIds = stats != null ? (List<String>) stats.get("solvedFormulas") : new ArrayList<>();
 
+                    // Filter unsolved problems from the selected category only
                     List<String> unsolved = new ArrayList<>();
-                    for (String id : allIds) {
+                    for (String id : categoryIds) {
                         if (!solvedIds.contains(id)) unsolved.add(id);
                     }
 
                     if (unsolved.isEmpty()) {
-                        System.out.println("You've solved ALL problems! You're a math master!");
+                        System.out.println("You've solved all problems in this category! Amazing!");
                         continue;
                     }
 
-                    System.out.println("\nAvailable unsolved problems:");
+                    System.out.println("\nAvailable unsolved problems in " + selectedCategory + ":");
                     for (int i = 0; i < unsolved.size(); i++) {
                         String id = unsolved.get(i);
                         String title = formulas.getTitle(id);
