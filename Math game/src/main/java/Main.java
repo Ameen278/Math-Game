@@ -37,7 +37,7 @@ public class Main {
                     System.out.println(success ? "Registration successful!" : "Username already taken.");
 
                     if (success) {
-                        boolean isAdmin = username.equalsIgnoreCase("admin");
+                        boolean isAdmin = username.equals("admin");
                         main_menu(db, isAdmin, username, auth);
                     }
 
@@ -55,7 +55,7 @@ public class Main {
                     boolean loggedIn = auth.login(username, password);
                     if (loggedIn) {
                         System.out.println("Login successful! Welcome, " + username + "!");
-                        boolean isAdmin = username.equalsIgnoreCase("admin");
+                        boolean isAdmin = username.equals("admin");
                         main_menu(db, isAdmin, username, auth);
                     } else {
                         System.out.println("Invalid username or password.");
@@ -230,12 +230,12 @@ public class Main {
                             System.out.println("You already solved this one!");
                         }
                     } else {
-                        System.out.println("Incorrect! Correct answer: " + correctAnswer);
+                        System.out.println("Incorrect");
                     }
 
                 }
 
-                // ================= ADMIN: ADD FORMULA =================
+                // ============2===== ADMIN: ADD FORMULA =================
                 else if (isAdmin && choice == 2) {
                     System.out.println("\n--- Add New Formula ---");
                     System.out.print("Title: ");

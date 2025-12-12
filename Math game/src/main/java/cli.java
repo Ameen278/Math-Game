@@ -25,7 +25,7 @@ public class cli {
     System.out.println("");
     System.out.println("                                 Math Game  ");
     System.out.println("");
-    System.out.println("                    1) Register     2) Login     3) Exit");
+    System.out.println("                    1) Register     2) Login     3) Exit\n");
     }
 
     public void mainMenu(String username, long points, int solved, boolean isAdmin)
